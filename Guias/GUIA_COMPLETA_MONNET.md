@@ -1,34 +1,50 @@
-# 🏦 Guía Completa de Integración — Monnet Payments Payin API
-> **Audiencia:** Full-Stack Web Developer  
-> **Idioma:** Español  
-> **Versión de API:** v3  
+# 📚 Guía Completa de Monnet Payments Payin API
+
+> **Audiencia:** Full Stack Web Developers
+> **Versión de API:** v3
 > **Fecha:** Febrero 2026
+> **Idioma:** Español
 
 ---
 
 ## 📋 Tabla de Contenidos
 
-1. [¿Qué es Monnet Payments?](#1-qué-es-monnet-payments)
-2. [¿Para qué sirve esta API?](#2-para-qué-sirve-esta-api)
-3. [Arquitectura General](#3-arquitectura-general)
-4. [Ambientes (CERT y PROD)](#4-ambientes-cert-y-prod)
-5. [Credenciales y Autenticación](#5-credenciales-y-autenticación)
-6. [Métodos de Pago Disponibles](#6-métodos-de-pago-disponibles)
-7. [Flujo Principal — Crear una Transacción](#7-flujo-principal--crear-una-transacción)
-8. [Consultar Estado de una Transacción](#8-consultar-estado-de-una-transacción)
-9. [Notificaciones de Pago (Webhooks)](#9-notificaciones-de-pago-webhooks)
-10. [Yape One Shot](#10-yape-one-shot)
-11. [Yape On File (Suscripciones OCP)](#11-yape-on-file-suscripciones-ocp)
-12. [Cuentas Virtuales (Virtual Accounts)](#12-cuentas-virtuales-virtual-accounts)
-13. [Códigos de Estado](#13-códigos-de-estado)
-14. [Códigos de Error](#14-códigos-de-error)
-15. [Tipos de Documentos por País](#15-tipos-de-documentos-por-país)
-16. [Browsers/Dispositivos Soportados](#16-browsersdi%C3%ADspositivos-soportados)
-17. [🚀 Pasos para Implementar en un Nuevo Proyecto Fintech](#17--pasos-para-implementar-en-un-nuevo-proyecto-fintech)
+1. [Introducción](#1-introducción)
+2. [¿Qué es Monnet Payments?](#2-qué-es-monnet-payments)
+3. [Características Principales](#3-características-principales)
+4. [Requisitos Técnicos y Prerrequisitos](#4-requisitos-técnicos-y-prerrequisitos)
+5. [Ambientes (CERT y PROD)](#5-ambientes-cert-y-prod)
+6. [Credenciales y Autenticación](#6-credenciales-y-autenticación)
+7. [Métodos de Pago Disponibles](#7-métodos-de-pago-disponibles)
+8. [Flujo Principal — Crear una Transacción](#8-flujo-principal--crear-una-transacción)
+9. [Consultar Estado de una Transacción](#9-consultar-estado-de-una-transacción)
+10. [Notificaciones de Pago (Webhooks)](#10-notificaciones-de-pago-webhooks)
+11. [Yape One Shot](#11-yape-one-shot)
+12. [Yape On File (Suscripciones OCP)](#12-yape-on-file-suscripciones-ocp)
+13. [Cuentas Virtuales (Virtual Accounts)](#13-cuentas-virtuales-virtual-accounts)
+14. [Códigos de Estado](#14-códigos-de-estado)
+15. [Códigos de Error](#15-códigos-de-error)
+16. [Tipos de Documentos por País](#16-tipos-de-documentos-por-país)
+17. [Browsers/Dispositivos Soportados](#17-browsersdispositivos-soportados)
+18. [Pasos para Implementar en un Nuevo Proyecto Fintech](#18-pasos-para-implementar-en-un-nuevo-proyecto-fintech)
+19. [Ejemplos de Código y Mejores Prácticas](#19-ejemplos-de-código-y-mejores-prácticas)
+20. [Patrones de Integración](#20-patrones-de-integración)
+21. [Manejo de Errores y Gestión de Estados](#21-manejo-de-errores-y-gestión-de-estados)
+22. [Mejores Prácticas](#22-mejores-prácticas)
+23. [Flujos de Pago Detallados](#23-flujos-de-pago-detallados)
+24. [Estructura Recomendada del Proyecto](#24-estructura-recomendada-del-proyecto)
+25. [Flujo de Desarrollo Recomendado](#25-flujo-de-desarrollo-recomendado)
+26. [Monitoreo y Mantenimiento](#26-monitoreo-y-mantenimiento)
 
 ---
 
-## 1. ¿Qué es Monnet Payments?
+## 1. Introducción
+
+Monnet Payments Payin API es una plataforma integral de procesamiento de pagos que permite a las empresas aceptar pagos en toda Latinoamérica a través de múltiples canales. Funciona como intermediario entre los comerciantes y diversos procesadores de pago, ofreciendo una API unificada para manejar diversos métodos de pago incluyendo tarjetas de crédito/débito, transferencias bancarias, pagos en efectivo, billeteras móviles y cuentas virtuales.
+
+---
+
+## 2. ¿Qué es Monnet Payments?
 
 **Monnet Payments** es una empresa de intermediación de pagos y cobros online para **Latinoamérica**. Actúa como un gateway de pagos que conecta a tus usuarios con los procesadores bancarios y métodos de pago locales de cada país.
 
@@ -52,64 +68,56 @@
 
 ---
 
-## 2. ¿Para qué sirve esta API?
+## 3. Características Principales
 
-La **API Payin de Monnet** sirve para **cobrar pagos de tus usuarios** (clientes finales) a través de múltiples métodos de pago locales en Latinoamérica. Con **una sola integración** puedes:
+### Métodos de Pago Soportados
 
-- Aceptar pagos con tarjeta de crédito/débito en 6 países LATAM
-- Aceptar pagos bancarios online
-- Aceptar pagos en efectivo (farmacias, agentes)
-- Integrar billeteras digitales como **Yape** (Perú)
-- Crear **Cuentas Virtuales** para depósitos automáticos
-- Gestionar **suscripciones recurrentes**
+| Método | Países | Descripción |
+|--------|-----------|-------------|
+| **TCTD** | Todo LATAM | Tarjetas de Crédito y Débito |
+| **TC** | Todo LATAM | Tarjetas de Crédito |
+| **TD** | Todo LATAM | Tarjetas de Débito |
+| **Cash** | Perú, Ecuador, Argentina, Colombia, Guatemala | Pagos en efectivo en puntos físicos |
+| **BankTransfer** | Perú, Ecuador, México, Chile, Argentina, Colombia, Guatemala, Brasil | Transferencias bancarias en línea |
+| **BankTransfer_Businesses** | Perú | Transferencias bancarias empresariales |
+| **Wallet** | Perú, Ecuador, Colombia, Guatemala, Argentina | Pagos mediante billeteras móviles |
+| **QR** | Perú, Chile | Pagos QR (uso único) |
+| **VA** | México, Argentina, Perú | Cuentas Virtuales |
 
-> 💡 **Caso de uso ideal para Fintech:** un usuario hace un depósito o pago a tu plataforma usando su banco local o wallet, Monnet procesa el pago y te notifica via webhook cuando el dinero está confirmado.
-
-### Ventajas técnicas clave:
-- ✅ No requiere instalar apps ni SDKs propietarios
-- ✅ Protocolo estandarizado: puro **HTTPS + JSON**
-- ✅ Compatible con cualquier lenguaje backend (Node.js, PHP, Python, Java, etc.)
-- ✅ Ambiente de pruebas gratuito (CERT/Sandbox)
-- ✅ Volumen recomendado: hasta **10 transacciones por segundo**
-
----
-
-## 3. Arquitectura General
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         TU PLATAFORMA FINTECH                        │
-│                                                                       │
-│   Frontend (React/Next.js)         Backend (Node/Laravel/etc.)        │
-│   ───────────────────────          ──────────────────────────         │
-│   • Checkout / formulario    ───►  • Genera SHA512                    │
-│   • Redirige al gateway            • POST a Monnet API                │
-│   • Muestra resultado              • Recibe URL de pago               │
-│                                    • Expone endpoint webhook          │
-└────────────────────────────────────────────────────────────────────┘
-                │                               │
-                │                               │
-                ▼                               ▼
-┌──────────────────────────┐      ┌──────────────────────────────────┐
-│   MONNET PAYMENTS API    │      │   TU WEBHOOK ENDPOINT (HTTPS)    │
-│                          │      │                                  │
-│  • Valida transacción    │      │  POST /monnet/webhook            │
-│  • Genera link de pago   │      │  • Verifica SHA512               │
-│  • Reenvía al banco      │      │  • Actualiza BD                  │
-│  • Notifica resultado    │─────►│  • Responde HTTP 200             │
-└──────────────────────────┘      └──────────────────────────────────┘
-                │
-                ▼
-┌──────────────────────────┐
-│  BANCO / METODO DE PAGO  │
-│  (BCP, Interbank, Yape,  │
-│   Visa, Mastercard...)   │
-└──────────────────────────┘
-```
+### Soluciones Especiales
+- **Yape One Shot**: Pagos de autorización única via Yape app
+- **Yape on File (OCP)**: Pagos por suscripción con consentimiento almacenado
+- **Cuentas Virtuales**: Cuentas bancarias específicas por país para seguimiento automatizado de depósitos
 
 ---
 
-## 4. Ambientes (CERT y PROD)
+## 4. Requisitos Técnicos y Prerrequisitos
+
+### URLs de Entorno
+- **CERT (Test)**: `https://cert.payin.api.monnetpayments.com/`
+- **PROD (Producción)**: `https://payin.api.monnetpayments.com/`
+
+### Requisitos de Autenticación
+- **API Key**: Identificador público del comerciante
+- **Signature Key**: Clave secreta para firmas HMAC-SHA512
+- **Merchant ID**: Identificador único asignado por Monnet
+
+### Requisitos de Seguridad
+- Todas las comunicaciones deben usar HTTPS
+- Verificación de firmas usando HMAC-SHA512
+- Validación de timestamp Unix (ventana de 2 minutos)
+- Puntos finales públicos para webhooks
+
+### Prerrequisitos Técnicos
+- Servidor capaz de manejar solicitudes HTTPS POST
+- Capacidad para generar hashes SHA-512
+- Punto final webhook para notificaciones de pago
+- Configuración CORS si es necesario para integración frontend
+- Soporte para formato JSON request/response
+
+---
+
+## 5. Ambientes (CERT y PROD)
 
 Monnet proporciona **dos ambientes** completamente separados:
 
@@ -137,11 +145,11 @@ Usado una vez que Monnet aprueba tu certificación.
 
 ---
 
-## 5. Credenciales y Autenticación
+## 6. Credenciales y Autenticación
 
-### 5.1 Obtener credenciales
+### 6.1 Obtener credenciales
 
-1. Contacta a tu representante de cuenta en Monnet para que te creen un account en el Back Office CERT
+1. Contacta a tu representante de cuenta en Monnet Payments para que te creen un account en el Back Office CERT
 2. Accede a: [https://cert.payin.monnetpayments.com/pages/auth/login](https://cert.payin.monnetpayments.com/pages/auth/login)
 3. Ve a **Perfil → Admin → Merchant Data**
 4. Obtén tus dos claves:
@@ -155,7 +163,7 @@ Usado una vez que Monnet aprueba tu certificación.
 
 También debes configurar en el Back Office la **URL de webhook/notificación** donde Monnet enviará las confirmaciones de pago.
 
-### 5.2 Generación del Hash de Verificación (SHA512)
+### 6.2 Generación del Hash de Verificación (SHA512)
 
 El campo `payinVerification` es obligatorio en cada transacción. Se calcula así:
 
@@ -198,7 +206,7 @@ def generate_payin_verification(merchant_id, operation_number, amount, currency,
     return hashlib.sha512(raw_string.encode()).hexdigest()
 ```
 
-### 5.3 Autenticación para Virtual Accounts (HMAC-SHA512)
+### 6.3 Autenticación para Virtual Accounts (HMAC-SHA512)
 
 Las Cuentas Virtuales usan un sistema de autenticación diferente basado en **HMAC-SHA512** con headers:
 
@@ -222,7 +230,7 @@ function generateVASignature(secretKey, apiKey) {
 
 ---
 
-## 6. Métodos de Pago Disponibles
+## 7. Métodos de Pago Disponibles
 
 El campo `payinMethod` define qué tipo de pago usará el cliente:
 
@@ -240,9 +248,9 @@ El campo `payinMethod` define qué tipo de pago usará el cliente:
 
 ---
 
-## 7. Flujo Principal — Crear una Transacción
+## 8. Flujo Principal — Crear una Transacción
 
-### 7.1 ¿Cómo funciona?
+### 8.1 ¿Cómo funciona?
 
 ```
 1. Usuario selecciona método de pago en tu sitio
@@ -254,14 +262,14 @@ El campo `payinMethod` define qué tipo de pago usará el cliente:
 7. Tu sistema actualiza el estado del pedido
 ```
 
-### 7.2 Endpoint
+### 8.2 Endpoint
 
 ```
 POST https://cert.monnetpayments.com/api-payin/v3/online-payments
 Content-Type: application/json
 ```
 
-### 7.3 Campos del Request (Perú - ejemplo completo)
+### 8.3 Campos del Request (Perú - ejemplo completo)
 
 > ⚠️ **IMPORTANTE:** Todos los campos deben enviarse aunque sean opcionales. Los campos `payinCustomerName`, `payinCustomerLastName`, `payinCustomerEmail` y `payinCustomerPhone` **NUNCA pueden ir vacíos**.
 
@@ -297,7 +305,7 @@ Content-Type: application/json
 | `URLMonnet` | String | ✅ | URL del ambiente Monnet (CERT o PROD) |
 | `typePost` | String | ✅ | Siempre: `"json"` |
 
-### 7.4 Ejemplo completo del Request:
+### 8.4 Ejemplo completo del Request:
 
 ```json
 {
@@ -344,7 +352,7 @@ Content-Type: application/json
 }
 ```
 
-### 7.5 Response exitoso:
+### 8.5 Response exitoso:
 
 ```json
 {
@@ -359,21 +367,24 @@ Content-Type: application/json
 
 ---
 
-## 8. Consultar Estado de una Transacción
+## 9. Consultar Estado de una Transacción
 
 Puedes consultar el estado de transacciones a través de un `POST`:
 
 ### Endpoint:
+
 ```
 POST https://cert.monnetpayments.com/ms-experience-payin/merchant/{MID}/operations
 ```
 
 ### Header requerido:
+
 ```
 authorization: SHA256(MerchantID + KeyMonnet)
 ```
 
 ### Request — Por ID de operación:
+
 ```json
 {
   "payinMerchantOperationNumber": "ORDER-20260220-001"
@@ -381,6 +392,7 @@ authorization: SHA256(MerchantID + KeyMonnet)
 ```
 
 ### Request — Por rango de fechas:
+
 ```json
 {
   "payinStartDate": "2026-01-01",
@@ -391,6 +403,7 @@ authorization: SHA256(MerchantID + KeyMonnet)
 > ⚠️ No puedes usar la fecha actual como `payinStartDate`; usa como mínimo el día anterior (`hoy - 1`).
 
 ### Response:
+
 ```json
 {
   "payinMerchantID": "674",
@@ -409,7 +422,7 @@ authorization: SHA256(MerchantID + KeyMonnet)
 
 ---
 
-## 9. Notificaciones de Pago (Webhooks)
+## 10. Notificaciones de Pago (Webhooks)
 
 Cuando Monnet recibe confirmación del banco de que un pago fue procesado, hace un **HTTP POST a tu endpoint** con el resultado.
 
@@ -420,6 +433,7 @@ Cuando Monnet recibe confirmación del banco de que un pago fue procesado, hace 
 - Verificar el hash para evitar notificaciones falsas
 
 ### Payload recibido:
+
 ```json
 {
   "payinStateID": "5",
@@ -438,6 +452,7 @@ Cuando Monnet recibe confirmación del banco de que un pago fue procesado, hace 
 ```
 
 ### Verificación del webhook (Node.js):
+
 ```javascript
 const crypto = require('crypto');
 
@@ -478,7 +493,7 @@ app.post('/monnet/webhook', (req, res) => {
 
 ---
 
-## 10. Yape One Shot
+## 11. Yape One Shot
 
 ### ¿Qué es?
 
@@ -489,6 +504,7 @@ app.post('/monnet/webhook', (req, res) => {
 - Compatible con flujos móviles (deeplink a app Yape) y web (instrucciones en pantalla)
 
 ### Flujo:
+
 ```
 1. Usuario selecciona "Yape" como método de pago en tu web/app
 2. Tu backend crea una transacción con payinMethod: "Wallet" (o el código específico)
@@ -503,7 +519,7 @@ app.post('/monnet/webhook', (req, res) => {
 
 ---
 
-## 11. Yape On File (Suscripciones OCP)
+## 12. Yape On File (Suscripciones OCP)
 
 ### ¿Qué es?
 
@@ -521,16 +537,19 @@ app.post('/monnet/webhook', (req, res) => {
 | Yape OCP | `Yape_on_file` | Primera wallet integrada. Permite pagos on-demand con un solo consentimiento |
 
 ### Endpoint — Crear Suscripción:
+
 ```
 POST https://cert.subscriptions.payin.monnet.io/api/v1/subscription
 ```
 
 ### Header de autorización:
+
 ```
 Authorization: Bearer SHA512(merchantId + type + customerId + processorCode + keyPayin)
 ```
 
 ### Request (ON_DEMAND):
+
 ```json
 {
   "merchantId": 674,
@@ -550,6 +569,7 @@ Authorization: Bearer SHA512(merchantId + type + customerId + processorCode + ke
 ```
 
 ### Response exitoso (device MOBILE):
+
 ```json
 {
   "subscriptionId": 12345,
@@ -561,6 +581,7 @@ Authorization: Bearer SHA512(merchantId + type + customerId + processorCode + ke
 > El merchant debe redirigir al usuario al `deepLink` para que apruebe la suscripción en la app Yape.
 
 ### Request (RECURRENT — cada 3 meses, 150 soles):
+
 ```json
 {
   "merchantId": 674,
@@ -576,19 +597,21 @@ Authorization: Bearer SHA512(merchantId + type + customerId + processorCode + ke
 ```
 
 ### Cancelar Suscripción:
+
 ```
 DELETE https://cert.subscriptions.payin.monnet.io/api/v1/subscription/{subscriptionId}
 ```
 
 ---
 
-## 12. Cuentas Virtuales (Virtual Accounts)
+## 13. Cuentas Virtuales (Virtual Accounts)
 
 ### ¿Qué es?
 
 Una **Cuenta Virtual** es un número de cuenta bancaria único asignado a un usuario específico de tu plataforma. Funciona como una cuenta real para recibir transferencias, pero su propósito es **identificar automáticamente** de quién viene cada depósito.
 
 ### Flujo:
+
 ```
 1. Usuario solicita su cuenta virtual en tu app
 2. Tu backend crea la VA via Monnet API
@@ -607,6 +630,7 @@ Una **Cuenta Virtual** es un número de cuenta bancaria único asignado a un usu
 | 🇵🇪 Perú | `CCI` | `DNI` / `RUC` |
 
 ### Endpoint:
+
 ```
 POST {{base_url}}/merchant-payin-accounts/v1/accounts
 ```
@@ -620,6 +644,7 @@ POST {{base_url}}/merchant-payin-accounts/v1/accounts
 | `X-Account-deposit-mode` | `OWNER` (solo el dueño deposita) o `ANY` (cualquiera puede depositar) |
 
 ### Request body:
+
 ```json
 {
   "owner": {
@@ -652,6 +677,7 @@ POST {{base_url}}/merchant-payin-accounts/v1/accounts
 ```
 
 ### Response exitoso:
+
 ```json
 {
   "id": "acc_8af98b8c8a4",
@@ -671,6 +697,7 @@ POST {{base_url}}/merchant-payin-accounts/v1/accounts
 ```
 
 ### Webhook de depósito recibido:
+
 ```json
 {
   "version": "1.0",
@@ -706,7 +733,7 @@ POST {{base_url}}/merchant-payin-accounts/v1/accounts
 
 ---
 
-## 13. Códigos de Estado
+## 14. Códigos de Estado
 
 Las transacciones pasan por los siguientes estados:
 
@@ -723,7 +750,7 @@ Las transacciones pasan por los siguientes estados:
 
 ---
 
-## 14. Códigos de Error
+## 15. Códigos de Error
 
 ### Errores de Creación de Transacción:
 | Código | Descripción |
@@ -754,7 +781,7 @@ Las transacciones pasan por los siguientes estados:
 
 ---
 
-## 15. Tipos de Documentos por País
+## 16. Tipos de Documentos por País
 
 | País | Código | Descripción | Longitud |
 |---|---|---|---|
@@ -775,7 +802,7 @@ Las transacciones pasan por los siguientes estados:
 
 ---
 
-## 16. Browsers/Dispositivos Soportados
+## 17. Browsers/Dispositivos Soportados
 
 Para el voucher/gateway de Monnet, los navegadores mínimos requeridos son:
 
@@ -788,11 +815,7 @@ Para el voucher/gateway de Monnet, los navegadores mínimos requeridos son:
 
 ---
 
-## 17. 🚀 Pasos para Implementar en un Nuevo Proyecto Fintech
-
-A continuación, una guía paso a paso completa desde cero hasta estar listo para producción.
-
----
+## 18. Pasos para Implementar en un Nuevo Proyecto Fintech
 
 ### PASO 1: Contactar a Monnet y Obtener Acceso Sandbox
 
@@ -802,8 +825,6 @@ A continuación, una guía paso a paso completa desde cero hasta estar listo par
    - `MONNET_MERCHANT_ID`
    - `MONNET_KEY` (KeyMonnet / Signature Key)
 
----
-
 ### PASO 2: Configurar el Back Office CERT
 
 1. Ir a **Admin → Merchant Data**
@@ -812,8 +833,6 @@ A continuación, una guía paso a paso completa desde cero hasta estar listo par
    https://tuapp.com/api/webhooks/monnet
    ```
 3. Para Virtual Accounts: solicitar al equipo técnico de Monnet las credenciales adicionales (`X-Api-Key`, `secret-key`)
-
----
 
 ### PASO 3: Estructura del Proyecto Recomendada
 
@@ -839,8 +858,6 @@ tu-proyecto-fintech/
 └── .env
 ```
 
----
-
 ### PASO 4: Variables de Entorno
 
 ```env
@@ -860,8 +877,6 @@ MONNET_VA_SECRET=tu_secret_va
 # Tu dominio
 APP_URL=https://tuapp.com
 ```
-
----
 
 ### PASO 5: Implementar el Servicio de Monnet (Backend)
 
@@ -961,8 +976,6 @@ class MonnetService {
 
 module.exports = new MonnetService();
 ```
-
----
 
 ### PASO 6: Implementar los Endpoints (Controller)
 
@@ -1068,8 +1081,6 @@ exports.handleWebhook = async (req, res) => {
 };
 ```
 
----
-
 ### PASO 7: Configurar Rutas
 
 ```javascript
@@ -1087,8 +1098,6 @@ router.post('/webhook/monnet', handleWebhook);
 
 module.exports = router;
 ```
-
----
 
 ### PASO 8: Páginas del Frontend
 
@@ -1139,8 +1148,6 @@ export default function Checkout() {
 }
 ```
 
----
-
 ### PASO 9: Pruebas en Sandbox
 
 Áreas que debes probar antes de ir a producción:
@@ -1154,8 +1161,6 @@ export default function Checkout() {
 - [ ] ✅ **Expiración** — transacción con tiempo corto de expiración
 - [ ] ✅ **Errores de validación** — enviar campos inválidos y manejar errores `0001–0099`
 
----
-
 ### PASO 10: Checklist de Seguridad
 
 - [ ] 🔐 `KeyMonnet` guardada en variable de entorno, nunca hardcodeada ni en frontend
@@ -1166,8 +1171,6 @@ export default function Checkout() {
 - [ ] 🔐 Rate limiting en tu endpoint de creación de transacciones
 - [ ] 🔐 Para VA: `X-Api-Key` y `secret-key` también en variables de entorno
 - [ ] 🔐 Validar que el `payinAmount` del webhook coincida con el de tu BD antes de acreditar
-
----
 
 ### PASO 11: Ir a Producción
 
@@ -1188,34 +1191,424 @@ export default function Checkout() {
 
 ---
 
-## 📦 Dependencias Recomendadas (Node.js)
+## 19. Ejemplos de Código y Mejores Prácticas
 
-```json
-{
-  "dependencies": {
-    "axios": "^1.6.0",
-    "crypto": "built-in",
-    "express": "^4.18.0",
-    "dotenv": "^16.0.0"
+### 19.1 Ejemplo de Creación de Transacción (Node.js)
+
+```javascript
+const crypto = require('crypto');
+const axios = require('axios');
+
+async function createTransaction(transactionData) {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `${timestamp}${config.apiKey}${transactionData.payinMerchantOperationNumber}`;
+  const signature = crypto.createHmac('sha512', config.signatureKey).update(message).digest('hex');
+
+  try {
+    const response = await axios.post(
+      `${config.baseUrl}api-payin/v3/online-payments`,
+      transactionData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': config.apiKey,
+          'X-Timestamp': timestamp,
+          'X-Signature': signature
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Transaction creation failed:', error.response?.data);
+    throw error;
+  }
+}
+```
+
+### 19.2 Verificación de Webhook
+
+```javascript
+const crypto = require('crypto');
+
+function verifyWebhookSignature(requestBody, headers) {
+  const { 'x-signature': signature, 'x-timestamp': timestamp, 'x-api-key': apiKey } = headers;
+  
+  // Verificar timestamp está dentro de 2 minutos
+  const currentTime = Math.floor(Date.now() / 1000);
+  if (Math.abs(currentTime - parseInt(timestamp)) > 120) {
+    return false;
+  }
+
+  // Verificar API key
+  if (apiKey !== config.apiKey) {
+    return false;
+  }
+
+  // Verificar firma
+  const message = `${timestamp}${apiKey}${requestBody}`;
+  const expectedSignature = crypto.createHmac('sha512', config.signatureKey).update(message).digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+```
+
+### 19.3 Creación de Cuenta Virtual
+
+```javascript
+async function createVirtualAccount(accountData) {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `${timestamp}${config.apiKey}${accountData.owner.referenceId}`;
+  const signature = crypto.createHmac('sha512', config.signatureKey).update(message).digest('hex');
+
+  try {
+    const response = await axios.post(
+      `${config.baseUrl}merchant-payin-accounts/v1/accounts`,
+      accountData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': config.apiKey,
+          'X-Timestamp': timestamp,
+          'X-Signature': signature,
+          'X-Account-deposit-mode': 'OWNER' // o 'ANY'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Virtual account creation failed:', error.response?.data);
+    throw error;
+  }
+}
+```
+
+### 19.4 Creación de Suscripción Yape
+
+```javascript
+async function createYapeSubscription(subscriptionData) {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `${timestamp}${config.apiKey}${subscriptionData.customerId}`;
+  const signature = crypto.createHmac('sha512', config.signatureKey).update(message).digest('hex');
+
+  try {
+    const response = await axios.post(
+      'https://cert.subscriptions.payin.monnet.io/api/v1/subscription',
+      subscriptionData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${signature}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Subscription creation failed:', error.response?.data);
+    throw error;
+  }
+}
+```
+
+### 19.5 Verificación de Estado de Pago
+
+```javascript
+async function getPaymentStatus(merchantOperationNumber) {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `${timestamp}${config.apiKey}${merchantOperationNumber}`;
+  const signature = crypto.createHmac('sha512', config.signatureKey).update(message).digest('hex');
+
+  try {
+    const response = await axios.post(
+      `${config.baseUrl}merchant/{MID}/operations`,
+      {
+        payinMerchantOperationNumber: merchantOperationNumber
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${signature}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Status check failed:', error.response?.data);
+    throw error;
   }
 }
 ```
 
 ---
 
-## 🗂️ Resumen Rápido de Endpoints
+## 20. Patrones de Integración
 
-| Operación | Método | Endpoint (CERT) |
-|---|---|---|
-| Crear transacción | POST | `https://cert.monnetpayments.com/api-payin/v3/online-payments` |
-| Consultar estado | POST | `https://cert.monnetpayments.com/ms-experience-payin/merchant/{MID}/operations` |
-| Crear suscripción Yape | POST | `https://cert.subscriptions.payin.monnet.io/api/v1/subscription` |
-| Cancelar suscripción Yape | DELETE | `https://cert.subscriptions.payin.monnet.io/api/v1/subscription/{id}` |
-| Crear Virtual Account | POST | `{base_url}/merchant-payin-accounts/v1/accounts` |
-| Obtener detalles VA | GET | `{base_url}/merchant-payin-accounts/v1/accounts/{id}` |
-| Actualizar info VA | PATCH | `{base_url}/merchant-payin-accounts/v1/accounts/{id}` |
-| Cambiar estado VA | PATCH | `{base_url}/merchant-payin-accounts/v1/accounts/{id}/status` |
+### 20.1 Flujo de Pago Síncrono
+
+```javascript
+// Frontend inicia pago
+async function initiatePayment(order) {
+  try {
+    const transaction = await createTransaction({
+      payinAmount: order.total,
+      payinCurrency: 'USD',
+      payinMerchantOperationNumber: order.id,
+      payinTransactionOKURL: `${config.webhookUrl}/success`,
+      payinTransactionErrorURL: `${config.webhookUrl}/failure`
+    });
+    
+    // Redirigir a pasarela de pago
+    window.location.href = transaction.paymentUrl;
+  } catch (error) {
+    // Manejar error
+  }
+}
+```
+
+### 20.2 Flujo Asíncrono con Webhooks
+
+```javascript
+// Handler de webhook backend
+app.post('/webhook', async (req, res) => {
+  try {
+    // Verificar firma
+    if (!verifyWebhookSignature(req.body, req.headers)) {
+      return res.status(401).send('Invalid signature');
+    }
+
+    const { payinStateID, payinMerchantOperationNumber, payinAmount } = req.body;
+
+    // Procesar estado del pago
+    switch (payinStateID) {
+      case '5': // Autorizado
+        await processPaymentSuccess(payinMerchantOperationNumber, payinAmount);
+        break;
+      case '6': // Denegado
+        await processPaymentFailure(payinMerchantOperationNumber);
+        break;
+      default:
+        console.log('Unknown payment status:', payinStateID);
+    }
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Webhook processing error:', error);
+    res.status(500).send('Error processing webhook');
+  }
+});
+```
+
+### 20.3 Patrón de Integración de Cuentas Virtuales
+
+```javascript
+// Registro de usuario con cuenta virtual
+async function registerUserWithVirtualAccount(userData) {
+  try {
+    // Crear cuenta virtual
+    const virtualAccount = await createVirtualAccount({
+      owner: {
+        referenceId: userData.id,
+        type: 'PERSON',
+        document: {
+          type: 'DNI',
+          number: userData.documentNumber
+        },
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: {
+          countryCode: userData.countryCode,
+          number: userData.phoneNumber
+        }
+      },
+      account: {
+        category: 'VIRTUAL',
+        type: 'CCI', // o CVU, CLABE según país
+        country: userData.country,
+        currency: userData.currency,
+        name: `${userData.firstName}.${userData.lastName}`
+      }
+    });
+
+    // Almacenar detalles de cuenta virtual
+    await saveUserVirtualAccount(userData.id, virtualAccount);
+
+    return virtualAccount;
+  } catch (error) {
+    // Manejar error de creación de cuenta
+    throw error;
+  }
+}
+```
+
+### 20.4 Patrón de Suscripción Yape
+
+```javascript
+// Pagos basados en suscripción
+async function processSubscriptionPayment(subscriptionId, amount) {
+  try {
+    // Verificar suscripción está activa
+    const subscription = await getSubscriptionDetails(subscriptionId);
+    
+    if (subscription.status !== 'ACTIVE') {
+      throw new Error('Subscription not active');
+    }
+
+    // Crear pago usando suscripción
+    const payment = await createPaymentUsingSubscription({
+      subscriptionId: subscriptionId,
+      amount: amount,
+      currency: subscription.currency
+    });
+
+    return payment;
+  } catch (error) {
+    // Manejar error de pago
+    throw error;
+  }
+}
+```
 
 ---
 
-*Documentación generada el 20 de Febrero de 2026 basada en la documentación oficial de Monnet Payments Payin API v3.*
+## 21. Manejo de Errores y Gestión de Estados
+
+### Códigos de Error Comunes
+- **0000**: Éxito
+- **0001-0007**: Campos requeridos faltantes
+- **0009**: ID de comerciante inválido
+- **0010**: Firma de verificación inválida
+- **0011**: Comerciante no habilitado
+- **9001-9099**: Errores de procesamiento de pago
+- **B400-B500**: Errores de validación de negocio
+
+### Códigos de Estado
+- **1**: Creado
+- **2**: Pendiente de pago
+- **3**: Expirado
+- **5**: Autorizado/Completado
+- **6**: Denegado
+- **9**: Liquidado
+- **10**: Reembolsado
+- **11**: Devuelto
+
+---
+
+## 22. Mejores Prácticas
+
+### Mejores Prácticas de Seguridad
+1. Siempre usar HTTPS para todas las comunicaciones
+2. Implementar verificación de firma adecuada para webhooks
+3. Usar credenciales específicas por entorno (CERT vs PROD)
+4. Implementar rate limiting (máximo 10 transacciones por segundo)
+5. Almacenar datos sensibles de forma segura y nunca registrarlos
+
+### Mejores Prácticas de Rendimiento
+1. Procesar notificaciones webhook de forma asíncrona
+2. Implementar caché adecuada para datos frecuentemente accedidos
+3. Usar connection pooling para solicitudes API
+4. Implementar lógica de reintento con backoff exponencial
+5. Monitorear tiempos de respuesta de API y tasas de error
+
+### Mejores Prácticas de Desarrollo
+1. Probar exhaustivamente en entorno CERT antes de producción
+2. Implementar logging comprehensivo para debugging
+3. Usar manejo de errores adecuado y mensajes de error amigables
+4. Seguir requisitos específicos por país para formatos de documentos
+5. Validar todos los datos de entrada antes de enviar a API de Monnet
+
+### Mejores Prácticas de Despliegue en Producción
+1. Realizar testing de certificación antes de ir a vivo
+2. Monitorear entrega de webhooks y tiempos de respuesta
+3. Implementar mecanismos de fallback para procesamiento de pagos
+4. Revisar y actualizar integraciones API regularmente
+5. Mantener cumplimiento con regulaciones locales
+
+---
+
+## 23. Flujos de Pago Detallados
+
+### Flujo Completo de Transacción
+1. **Inicialización**: Cliente selecciona método de pago en frontend
+2. **Creación**: Backend crea transacción con Monnet API
+3. **Redirección**: Cliente redirigido a pasarela de pago
+4. **Pago**: Cliente completa pago en pasarela
+5. **Notificación**: Monnet envía webhook con estado
+6. **Verificación**: Backend verifica y procesa estado
+7. **Confirmación**: Cliente recibe confirmación
+
+### Flujo de Cuenta Virtual
+1. **Registro**: Usuario crea cuenta con información personal
+2. **Creación**: Sistema crea cuenta virtual con Monnet
+3. **Distribución**: Usuario recibe detalles de cuenta
+4. **Depósito**: Usuario realiza transferencia bancaria
+5. **Notificación**: Webhook notifica sobre depósito
+6. **Procesamiento**: Sistema procesa fondos y actualiza saldo
+
+### Flujo de Suscripción Yape
+1. **Suscripción**: Usuario autoriza suscripción via Yape
+2. **Creación**: Sistema crea suscripción con Monnet
+3. **Pago**: Sistema inicia pagos recurrentes
+4. **Notificación**: Webhook actualiza estado de suscripción
+5. **Manejo**: Sistema procesa pagos y actualiza facturación
+
+---
+
+## 24. Estructura Recomendada del Proyecto
+
+```
+monnet-payments/
+├── src/
+│   ├── services/
+│   │   ├── monnet-api.js          # Servicios principales de API
+│   │   ├── monnet-webhook.js      # Manejo de webhooks
+│   │   └── monnet-utils.js        # Utilidades y helpers
+│   ├── models/
+│   │   ├── transaction.js         # Modelo de transacción
+│   │   ├── subscription.js        # Modelo de suscripción
+│   │   └── virtual-account.js     # Modelo de cuenta virtual
+│   ├── controllers/
+│   │   ├── payment.js              # Controlador de pagos
+│   │   ├── webhook.js              # Controlador de webhooks
+│   │   └── subscription.js         # Controlador de suscripciones
+│   └── middleware/
+│       └── signature-verification.js
+├── config/
+│   └── monnet.js                  # Configuración de Monnet
+├── tests/
+│   ├── services/
+│   ├── controllers/
+│   └── integration/
+└── docs/
+    └── monnet-api.md               # Documentación interna
+```
+
+---
+
+## 25. Flujo de Desarrollo Recomendado
+
+1. **Setup Inicial**: Configurar entorno CERT y obtener credenciales
+2. **Implementación Básica**: Crear servicios API fundamentales
+3. **Integración Frontend**: Implementar flujo de pago en frontend
+4. **Webhooks**: Crear y probar endpoint de webhooks
+5. **Testing**: Realizar pruebas exhaustivas en CERT
+6. **Certificación**: Probar con Monnet para certificación
+7. **Producción**: Migrar a entorno PROD con monitoreo
+
+---
+
+## 26. Monitoreo y Mantenimiento
+
+- **Logs**: Implementar logging estructurado para todas las operaciones
+- **Métricas**: Monitorear tasas de éxito, tiempos de respuesta, errores
+- **Alertas**: Configurar alertas para fallos críticos
+- **Actualizaciones**: Mantenerse informado sobre cambios en API
+- **Cumplimiento**: Revisar regularmente cumplimiento regulatorio
+
+---
+
+*Documentación generada el 22 de Febrero de 2026 basada en la documentación oficial de Monnet Payments Payin API v3.*
+
+*Consolida: ANALISIS_COMPLETO_MONNET.md + GUIA_DEFINITIVA_MONNET.md + Guia_Integracion_Monnet.md + Guia_Integracion_Monnet2.md + IMPLEMENTACION_GUIDE.md*
