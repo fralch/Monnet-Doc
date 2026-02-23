@@ -22,6 +22,8 @@ Esta guía consolida la información de los siguientes documentos oficiales:
 12. [Bancos Soportados](#bancos-soportados)
 13. [Notificaciones](#notificaciones)
 14. [Buenas Prácticas y Seguridad](#buenas-prácticas-y-seguridad)
+15. [Nuevas Funcionalidades](#nuevas-funcionalidades)
+16. [Integración en Código](#ejemplo-de-integración-en-código)
 
 ## Introducción
 
@@ -39,9 +41,9 @@ Para una visión general del flujo, consulta: [Payout Flow](01-Quick%20Start/01-
    - API Key
    - Estas credenciales se obtienen a través de tu account manager
 
-2. **Entorno de Pruebas**:
-   - Monnet ofrece un entorno de certificación para pruebas
-   - URL base: `https://api.monnet.com/api/v1/{merchantId}`
+2. **Entorno de Pruebas y Producción**:
+   - **Certificación (Pruebas)**: `https://cert.api.payout.monnet.io/api/v1/{merchantId}`
+   - **Producción (Live)**: `https://api.payout.monnet.io/api/v1/{merchantId}`
 
 3. **Información del Empleado**:
    - Nombre completo
@@ -96,10 +98,28 @@ Fuente: [Get Balance API](03-API%20PAYOUT/01-API%20Reference/03-Get%20Balance.md
 
 ### Autenticación
 
-Todas las solicitudes deben incluir:
-- `Merchant-ID`: En el header HTTP
-- `API-Key`: En el header HTTP
-- `Content-Type: application/json`
+Monnet soporta dos mecanismos de autenticación:
+
+#### HMAC (Keyed-hash message authentication codes)
+Para operaciones de alta integridad:
+- **Crear Payout**: `POST /payouts`
+- **Consultar Saldo**: `GET /balance`
+- **Consultar Estado**: `GET /payouts/{id}`
+- **Create Card Pushpayment**: `POST /api-payout-plus-real-time/{merchantId}`
+
+Incluir headers:
+- `monnet-api-key`: API Key del merchant
+- `signature`: HMAC SHA-256
+- `timestamp`: Timestamp de la solicitud
+
+#### OAuth 2.0 Bearer Token
+Para endpoints de validación:
+- **Scanning Account Info**: Validar entidades asociadas a celular
+- **Get Account Info**: Validar titularidad de cuenta
+
+Obtener token en:
+- **Certificación**: `https://cert.authentication.monnet.io/ms-authentication-service/authentication/api-integration/token`
+- **Producción**: `https://authentication.monnet.io/ms-authentication-service/authentication/api-integration/token`
 
 ### Endpoints Principales
 
@@ -183,6 +203,7 @@ Todas las solicitudes deben incluir:
 | 1 | Cuenta Corriente |
 | 2 | Cuenta de Ahorros |
 | 4 | Número de Celular (billeteras) |
+| 5 | Tarjeta (Card Pushpayment - Uso exclusivo de endpoint dedicado) |
 
 ## Ejemplos de Solicitud
 
@@ -379,7 +400,9 @@ Todas las solicitudes deben incluir:
 
 1. **Solo Moneda PEN**: Para accountType "Cellphone Number" (4), solo se acepta currency "PEN"
 2. **bankCode Obligatorio**: Para billeteras, el bankCode es obligatorio (ej: "037" para Yape)
-3. **Límite de Monto**: Máximo S/500.00 para billeteras (excepto Yape que permite hasta S/3,000.00)
+3. **Límite de Monto**: Máximo S/500.00 para billeteras, excepto:
+   - **Yape (037)**: Máximo S/3,000.00
+   - **Otros Account Types**: Máximo S/30,000.00 PEN
 4. **Número de Celular**: Debe tener 9 dígitos y empezar con 9
 
 ### Validaciones de Documentos
@@ -391,39 +414,66 @@ Todas las solicitudes deben incluir:
 
 ## Bancos Soportados en Perú
 
-### Bancos con Transferencia en Tiempo Real
+### Entidades Financieras Soportadas
 
-| Código | Banco |
-|--------|-------|
-| 001 | Banco BBVA |
-| 002 | Banco de Credito |
-| 003 | Interbank |
-| 004 | Scotiabank |
-| 005 | Banco de Comercio |
-| 007 | Banco Pichincha |
-| 011 | Banco GNB |
-| 018 | Banco de la Nación |
-| 019 | Caja Arequipa |
-| 020 | Caja Cusco |
-| 021 | Caja Huancayo |
-| 023 | Caja Metropolitana |
-| 024 | Caja Municipal Ica |
-| 028 | Caja Trujillo |
-| 030 | Banco Falabella |
-| 032 | Mibanco |
-| 034 | Caja Piura |
-| 035 | Ripley |
-| 037 | Yape (Wallet) |
-| 040 | Plin (Wallet) |
-| 047 | Crediscotia |
+| Código | Entidad | Tipo |
+|--------|---------|------|
+| 001 | Banco BBVA | Banco |
+| 002 | Banco de Crédito | Banco |
+| 003 | Interbank | Banco |
+| 004 | Scotiabank | Banco |
+| 005 | Banco de Comercio | Banco |
+| 006 | Banco Interamericano de Finanzas (BanBif) | Banco |
+| 007 | Banco Pichincha | Banco |
+| 008 | Citibank | Banco |
+| 011 | Banco GNB | Banco |
+| 014 | Banco Santander | Banco |
+| 016 | Banco Cencosud | Banco |
+| 017 | ICBC PERU BANK | Banco |
+| 018 | Banco de la Nación | Banco |
+| 019 | Caja Arequipa | Caja |
+| 020 | Caja Cusco | Caja |
+| 021 | Caja Huancayo | Caja |
+| 022 | Caja Maynas | Caja |
+| 023 | Caja Metropolitana | Caja |
+| 024 | Caja Municipal Ica | Caja |
+| 026 | Caja Sullana | Caja |
+| 027 | Caja Tacna | Caja |
+| 028 | Caja Trujillo | Caja |
+| 029 | Credinka | Caja |
+| 030 | Banco Falabella | Banco |
+| 031 | Caja Los Andes | Caja |
+| 032 | Mibanco | Banco |
+| 033 | Bim (Wallet) | Billetera |
+| 034 | Caja Piura | Caja |
+| 035 | Ripley | Banco |
+| 036 | Financiera Efectiva | Financiera |
+| 037 | Yape (Wallet) | Billetera |
+| 038 | Compartamos Financiera | Financiera |
+| 039 | Banco Alfin | Banco |
+| 040 | Plin (Wallet) | Billetera |
+| 041 | Cooperativa Abaco | Cooperativa |
+| 042 | Luqea (Wallet) | Billetera |
+| 043 | Tarjetas Peruanas Prepago - Ligo (Wallet) | Billetera |
+| 044 | Financiera Confianza | Financiera |
+| 045 | Prex (Wallet) | Billetera |
+| 046 | Tarjeta Oh | Tarjeta |
+| 047 | Crediscotia | Banco |
+| 048 | Dale (Wallet) | Billetera |
+| 049 | Global66 (Wallet) | Billetera |
 
-### Billeteras Móviles
+### Límites por Tipo de Billetera
 
-| Código | Billetera | bankCode | Límite Máximo |
-|--------|-----------|----------|--------------|
-| Yape | Yape | 037 | S/3,000.00 |
-| Plin | Plin | 040 | S/500.00 |
-| Bim | Bim | 033 | S/500.00 |
+| Código | Billetera | Límite Máximo |
+|--------|-----------|---------------|
+| 037 | Yape | S/3,000.00 |
+| 040 | Plin | S/500.00 |
+| 033 | Bim | S/500.00 |
+| 042 | Luqea | S/500.00 |
+| 043 | Ligo | S/500.00 |
+| 045 | Prex | S/500.00 |
+| 048 | Dale | S/500.00 |
+| 049 | Global66 | S/500.00 |
 
 ## Notificaciones
 
@@ -502,6 +552,114 @@ Si recibes un timeout (no respuesta en 30 segundos):
 3. **Pruebas de Error**: Simular diferentes escenarios de error
 4. **Pruebas de Carga**: Validar rendimiento con múltiples solicitudes
 
+## Nuevas Funcionalidades
+
+### Card Pushpayment (Disponible desde Q3 2025)
+
+Nuevo método para transferencias en tiempo real a tarjetas VISA (crédito, débito o prepago) usando OCT (Original Credit Transfer).
+
+**Diferencias con Create Payout:**
+- Endpoint específico: `POST /api-payout-plus-real-time/{merchantId}`
+- Account Type: `5` (exclusivo para Card)
+- Responde con **iframe HTML** que debe embeberse en tu aplicación
+- El usuario ingresa datos de tarjeta en el formulario
+- Soporta Card on File (habilitado por defecto)
+
+**Parámetros requeridos:**
+- `email`: Obligatorio (debe pertenecer al titular de la tarjeta)
+- `accountType`: 5
+- `timeoutUrl`: URL de redirección en caso de timeout
+- `merchantLogo`: (Opcional) URL del logo del merchant (187x40px recomendado)
+- `expirationTime`: (Opcional) Duración de sesión en minutos (5-30)
+
+**Ejemplo de solicitud:**
+
+```json
+{
+  "country": "PER",
+  "amount": 50001,
+  "currency": "PEN",
+  "orderId": "CARD-2024-00789",
+  "beneficiary": {
+    "name": "Juan",
+    "lastName": "Perez",
+    "email": "juan.perez@empresa.com",
+    "document": {
+      "type": 1,
+      "number": "12345678"
+    }
+  },
+  "destination": {
+    "bankAccount": {
+      "accountType": 5
+    }
+  },
+  "timeoutUrl": "https://mitienda.com/timeout",
+  "merchantLogo": "https://mitienda.com/logo.png",
+  "expirationTime": "10"
+}
+```
+
+### Scanning Account Info (Solo Perú)
+
+Valida qué entidades están disponibles para recibir pagos en un número de celular.
+
+**Endpoint:**
+- Certificación: `https://cert.scanning.payout.monnet.io/ms-payouts-scanning-entities/api/v1/scanning/account-info`
+- Producción: `https://scanning.payout.monnet.io/ms-payouts-scanning-entities/api/v1/scanning/account-info`
+
+**Autenticación:** OAuth 2.0 Bearer Token
+
+**Parámetros requeridos:**
+- `request_id`: UUID único para trazabilidad
+- `account_type`: 4 (Cellphone Number)
+- `account_identifier`: Número de celular (9 dígitos, empieza con 9)
+- `country`: PER
+
+**Ejemplo:**
+```json
+{
+  "request_id": "fa4f11ce-a997-46fb-b7c6-351975f0a6d4",
+  "account_type": "4",
+  "account_identifier": "987654321",
+  "country": "PER"
+}
+```
+
+**Respuesta exitosa:**
+```json
+{
+  "traceId": "3caa82a1-c23e-48b8-ab8b-125432863db3",
+  "data": {
+    "requestId": "fa4f11ce-a997-46fb-b7c6-351975f0a6d4",
+    "accountIdentifier": "987654321",
+    "entities": [
+      { "entityBrand": "Yape", "status": "AVAILABLE" },
+      { "entityBrand": "Plin", "status": "AVAILABLE" },
+      { "entityBrand": "Banco de Crédito", "status": "AVAILABLE" }
+    ],
+    "date": "2024-03-21T19:37:29Z"
+  }
+}
+```
+
+**Límite de tasa:** 60 requests por minuto (TPM)
+
+### Get Account Info (Solo Argentina - Disponible para Perú próximamente)
+
+Valida titularidad de cuenta bancaria sin ejecutar un payout.
+
+**Endpoint:**
+- Certificación: `https://cert.accountinfo.payout.monnet.io/ms-payouts-account-validations/api/v1/account-validations/account-info`
+- Producción: `https://accountinfo.payout.monnnet.io/ms-payouts-account-validations/api/v1/account-validations/account-info`
+
+**Autenticación:** OAuth 2.0 Bearer Token
+
+**Casos de uso:**
+- Validar que la cuenta pertenece al empleado
+- Mejorar conversión de usuarios
+- Cumplimiento regulatorio
+
 ## Ejemplo de Integración en Código
 
 ### Python Example
@@ -511,7 +669,7 @@ import requests
 import json
 
 def create_payout(employee_data, amount, order_id):
-    url = "https://api.monnet.com/api/v1/{merchantId}/payouts"
+    url = "https://api.payout.monnet.io/api/v1/{merchantId}/payouts"
     headers = {
         "Merchant-ID": "YOUR_MERCHANT_ID",
         "API-Key": "YOUR_API_KEY",
@@ -572,7 +730,7 @@ print(result)
 const axios = require('axios');
 
 async function createPayout(employeeData, amount, orderId) {
-    const url = `https://api.monnet.com/api/v1/{merchantId}/payouts`;
+    const url = `https://api.payout.monnet.io/api/v1/{merchantId}/payouts`;
     const headers = {
         'Merchant-ID': 'YOUR_MERCHANT_ID',
         'API-Key': 'YOUR_API_KEY',
